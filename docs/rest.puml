@@ -1,0 +1,30 @@
+@startuml
+
+class Provider {
+    name: ProviderName
+}
+
+class Resource {
+    name: ResourceName
+}
+
+class Availability {
+    id: AvailabilityId
+    from: DateTime
+    through: DateTime
+}
+
+Provider *-->"*" Resource
+Resource *-->"*" Availability
+
+
+class Consumer {
+    name: ConsumerName
+}
+
+class Reservation {
+    reserved: AvailabilityId
+}
+
+Consumer *--->"*" Reservation
+@enduml

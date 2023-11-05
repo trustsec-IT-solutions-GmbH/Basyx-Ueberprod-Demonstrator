@@ -1,0 +1,102 @@
+@startuml
+
+node "Marketplace" as marketplace {
+    component "Landingpage" as landingpage
+    component "Andwenderregistrierung" as usermanagement_ui
+    component "Kunden\nSelf-Service" as selfservice_ui
+
+    landingpage -> usermanagement_ui
+}
+
+node "Automation UI" as automation_ui {
+    component SucheUndBuchung<<tsec>>
+}
+
+
+node "Automation Plattform" as platform<<tsec>> {
+    component Usermanagement as user_management
+    component "Self-Service" as selfservice
+
+    component Search as search<<tsec>>
+    component Buchung as buchung<<tsec>>
+
+    component Config as config<<tsec>>
+
+    database "DB" as platform_db<<tsec>>
+    component "Abrechnung" as billing<<tsec>>
+
+    component "Verwaltung der\nZeitfenster" as timeslot_manager<<tsec>>
+    component "Scraper" as scraper<<tsec>>
+    component "Rerservation" as reservation<<tsec>>
+
+    selfservice --[hidden]> config
+
+    config -> platform_db
+    platform_db <- timeslot_manager
+    platform_db --> billing
+
+    search --> timeslot_manager
+    buchung --> timeslot_manager
+    timeslot_manager --> scraper
+    timeslot_manager --> reservation
+}
+
+node "Konfigurator\nVerwaltungsschalen" as konfigurator_op {
+    component "OP Konfigurator" as op_konfigurator<<manuell>>
+    component "Registry" as op_registry<<manuell>>
+    component "Resource 1" as op_res_1<<manuell>>
+    component "Resource 2" as op_res_2<<manuell>>
+    component "Resource n" as op_res_n<<manuell>>
+    op_konfigurator -> op_registry
+    op_konfigurator -->op_res_1
+    op_konfigurator -->op_res_2
+    op_konfigurator -->op_res_n
+}
+
+node "MES\nMuckenhirn" as mes_mh {
+    component "Scheduler" as scheduler<<tsec>>
+    component "MES" as mes<<muckenhirn>>
+    component "Registry" as mes_registry<<muckenhirn>>
+    component "Resource 1" as mes_res_1<<muckenhirn>>
+    component "Resource 2" as mes_res_2<<muckenhirn>>
+    component "Resource n" as mes_res_n<<muckenhirn>>
+
+    scheduler <- mes
+    mes -> mes_registry
+    mes --> mes_res_1
+    mes --> mes_res_2
+    mes --> mes_res_n
+}
+
+node "Resource Simualator" as res_sim_tsec {
+    component "Simulator UI" as res_sim_ui<<tsec>>
+    component "Simulator" as res_sim<<tsec>>
+    component "Registry" as res_sim_registry<<tsec>>
+    component "Resource 1" as res_sim_res_1<<tsec>>
+    component "Resource 2" as res_sim_res_2<<tsec>>
+    component "Resource n" as res_sim_res_n<<tsec>>
+
+    res_sim_ui -> res_sim
+    res_sim -> res_sim_registry
+    res_sim --> res_sim_res_1
+    res_sim --> res_sim_res_2
+    res_sim --> res_sim_res_n
+}
+
+usermanagement_ui --> user_management
+selfservice_ui --> selfservice
+
+SucheUndBuchung --> search
+SucheUndBuchung --> buchung
+
+scraper --> op_registry
+scraper --> mes_registry
+scraper ----> res_sim_registry
+
+skinparam component {
+    BackgroundColor<<tsec>> palegreen
+    BackgroundColor<<muckenhirn>> lightblue
+    BackgroundColor<<manuell>> aquamarine
+}
+
+@enduml

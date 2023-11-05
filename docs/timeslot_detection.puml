@@ -1,0 +1,38 @@
+@startuml
+box "Platform" #palegreen
+    actor "Timeslot\nmanager" as ts_manager
+    database "Managed\nTimeslots" as ts_db
+    actor Scraper
+    participant config
+    collections supplier
+end box
+
+box "Supplier"
+    participant registry
+    collections resource
+    collections timeslot
+end box
+
+activate ts_manager
+    ts_manager -> Scraper: discover timeslots
+    activate Scraper
+        Scraper -> config: get suppliers
+        loop all supplier
+            Scraper -> supplier: get registry
+            Scraper -> registry: get all AASs
+            Scraper -> Scraper ++: filter resource
+            loop all resources
+                Scraper -> resource: get info
+                Scraper -> resource: get all submodels
+                Scraper -> Scraper ++: filter timeslots
+                loop all timeslots
+                    Scraper -> timeslot
+                end
+            end
+        end
+    deactivate Scraper
+    ts_manager -> ts_db: get previous\ntimeslots
+    ts_manager -> ts_manager ++: merge timeslots
+    ts_manager -> ts_db: update timeslots
+deactivate ts_manager
+@enduml

@@ -1,0 +1,44 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+package Platform {
+    class ResourceScraper {
+    }
+}
+
+package "per Supplier" {
+    class Registry {
+    }
+
+    class Resource<<AAS>> {
+    }
+
+    class PlatformManagedTimeSlot<<SubModel>> {
+        - slotId
+        - latestMaterialArrival
+        - latestGuaranteedProductShipment
+        - contract
+        - machineHours
+        - price
+        + prepareId
+        + commitId
+    }
+
+    class ResourceInfo<<SubModel>>  {
+        - supplierId
+        - machineLocationId
+        - machineType
+    }
+
+    Registry -->"*" Resource: shortId Prefix\nresource/
+    Resource *-->"*" PlatformManagedTimeSlot: as multiple\nsubmodels
+    Resource *-->"1" ResourceInfo
+    Resource *-->"?" NamePlate
+
+}
+
+ResourceScraper ..>"*" Registry: searches for resource/
+ResourceScraper ...>"*" Resource: extracts submodels\nfor "managedSlots/"
+
+
+@enduml

@@ -1,0 +1,42 @@
+@startuml
+actor client
+box "Platform" #palegreen
+participant "Reservierungs\nLogik" as reservation
+participant "Timeslot\nManager" as timeslots
+collections "timeslot" as timeslot
+end box
+collections "timeslot\nin remote\nAAS" as remote_timeslot
+
+activate client
+    client -> reservation: ids der\ntimeslots
+    activate reservation
+        loop all selected timeslots
+            reservation -> timeslots: get by id
+            reservation -> timeslot: prepare(id)
+            activate timeslot
+                timeslot -> remote_timeslot: prepareId = id
+                note right: abort on\nerror
+            deactivate timeslot
+        end
+        alt no errors while prepare
+            loop all selected timeslots
+                reservation -> timeslots: get by id
+                reservation -> timeslot: commit(id)
+                activate timeslot
+                    timeslot -> remote_timeslot: commitId = id
+                deactivate timeslot
+            end
+        else a prepare failed
+            loop all prepared timeslots
+                reservation -> timeslots: get by id
+                reservation -> timeslot: unprepare()
+                activate timeslot
+                    timeslot -> remote_timeslot: prepareId = null
+                deactivate timeslot
+            end
+        end
+    deactivate reservation
+deactivate client
+
+
+@enduml
